@@ -16,6 +16,7 @@ public class Main {
         long endTime;
         double elapsedMIllis;
 
+
         FileSearcher fs = new FileSearcher(findWord,fileName, NUM_THREADS);
         startTime = System.nanoTime();
         fs.startExecution();
