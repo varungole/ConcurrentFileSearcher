@@ -27,7 +27,6 @@ public class BatchProcessor {
                         if (!f.isDone()) {
                             f.cancel(true);
                         }
-                        executor.shutdownNow();
                     }
                     break;
                 }
@@ -37,11 +36,10 @@ public class BatchProcessor {
         }
     }
 
-    public boolean processBatch(List<String> batch, int lineOffset) {
+    public boolean processBatch(List<String> batch, int lineOffset, ExecutorService executor) {
         int totalLines = batch.size();
         int chunkSize = (int) Math.ceil((double) totalLines/NUM_THREADS);
 
-        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
         List<Future<?>> futures = new CopyOnWriteArrayList<>();
 
         for(int i=0; i<NUM_THREADS; i++) {
@@ -51,7 +49,6 @@ public class BatchProcessor {
         }
 
         closeThreads(futures, executor);
-        executor.shutdown();
         return false;
     }
 }

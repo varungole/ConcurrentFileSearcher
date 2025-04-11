@@ -23,28 +23,26 @@ class SearchTask implements Callable<Optional<Integer>> {
         this.wordToFind = wordToFind;
     }
 
-    private boolean containsWord(String[] words) {
-        for (String word : words) {
-            if (word.equalsIgnoreCase(wordToFind)) {
-                return true;
+    private void checkWord(String word, String wordToFind, int offSet, int j) {
+        if (word.equalsIgnoreCase(wordToFind)) {
+            if (found.compareAndSet(false, true)) {
+                System.out.println("✅ Found \"" + wordToFind + "\" at line " + (offSet + j + 1));
             }
         }
-        return false;
+    }
+
+    public boolean wordAlreadyFound() {
+        return Thread.currentThread().isInterrupted() || found.get();
     }
 
     @Override
     public Optional<Integer> call() {
         for (int j = startLine; j <= endLine && j < lines.size(); j++) {
-            if (Thread.currentThread().isInterrupted() || found.get()) break;
+            if (wordAlreadyFound()) break;
 
             String[] words = lines.get(j).split("\\s+");
             for (String word : words) {
-                if (word.equalsIgnoreCase(wordToFind)) {
-                    if (found.compareAndSet(false, true)) {
-                        System.out.println("✅ Found \"" + wordToFind + "\" at line " + (offSet + j + 1));
-                    }
-                    return null;
-                }
+                checkWord(word, wordToFind, offSet, j);
             }
         }
         return Optional.empty();
